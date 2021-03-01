@@ -49,7 +49,20 @@ namespace LibraryApi.Controllers
         {
             return Ok($"I have no idea, but you are running {userAgent}");
         }
+
+        [HttpPost("employees")]
+        public ActionResult Hire([FromBody] PostEmployeeRequest request)
+        {
+            return Ok($"Hiring {request.Name} in {request.Department} for {request.StartingSalary:c}");
+        }
     }
+    public class PostEmployeeRequest
+    {
+        public string Name { get; set; }
+        public string Department { get; set; }
+        public int StartingSalary { get; set; }
+    }
+
     public class GetEmployeesResponse
     {
         public List<string> Data { get; set; }
