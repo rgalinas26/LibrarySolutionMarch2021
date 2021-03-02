@@ -1,3 +1,4 @@
+using LibraryApi.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -31,6 +32,12 @@ namespace LibraryApi
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "LibraryApi", Version = "v1" });
             });
+
+            //services.AddTransient
+            //services.AddScoped
+            //services.AddSingleton
+
+            services.AddTransient<ILookupServerStatus, WillsHealthCheckServerStatus>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

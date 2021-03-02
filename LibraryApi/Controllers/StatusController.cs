@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LibraryApi.Services;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,14 +9,18 @@ namespace LibraryApi.Controllers
 {
     public class StatusController : ControllerBase
     {
+        private readonly ILookupServerStatus _statusLookup;
+
+        public StatusController(ILookupServerStatus statusLookup)
+        {
+            _statusLookup = statusLookup;
+        }
+
         [HttpGet("status")]
         public StatusResponse GetTheStatuts()
         {
-            return new StatusResponse
-            {
-                Message = "Everything is going great. Thanks for asking!",
-                LastChecked = DateTime.Now
-            };
+            StatusResponse status = _statusLookup.GetStatusFor();
+            return status; 
         }
 
         // the :int makes the route expect an int

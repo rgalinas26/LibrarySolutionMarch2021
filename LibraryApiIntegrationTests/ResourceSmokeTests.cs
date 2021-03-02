@@ -24,7 +24,6 @@ namespace LibraryApiIntegrationTests
         {
             var response = await _client.GetAsync(resource);
             Assert.True(response.IsSuccessStatusCode);
-
         }
 
     }
