@@ -27,6 +27,18 @@ namespace LibraryApi.Controllers
             _logger = logger;
         }
 
+        [HttpPost("/books")]
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 15)]
+        public async Task<ActionResult> AddABook([FromBody] PostBookRequest request)
+        {
+            var bookToSave = _mapper.Map<Book>(request);
+            _context.Books.Add(bookToSave);
+            await _context.SaveChangesAsync();
+            var response = _mapper.Map<GetBookDetailsResponse>(bookToSave);
+
+            return CreatedAtRoute("books#getbookbyid", new { id = response.Id }, response);
+        }
+
         [HttpGet("/books")]
         public async Task<ActionResult> GetAllBooks()
         {
@@ -41,7 +53,7 @@ namespace LibraryApi.Controllers
             return Ok(response);
         }
 
-        [HttpGet("/books/{id:int}")]
+        [HttpGet("/books/{id:int}", Name ="books#getbookbyid")]
         public async Task<ActionResult> GetBookById(int id)
         {
             var book = await _context.Books
