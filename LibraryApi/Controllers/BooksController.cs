@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper.QueryableExtensions;
+using Microsoft.Extensions.Logging;
 
 namespace LibraryApi.Controllers
 {
@@ -16,12 +17,28 @@ namespace LibraryApi.Controllers
         private readonly LibraryDataContext _context;
         private readonly IMapper _mapper;
         private readonly MapperConfiguration _config;
+        private readonly ILogger<BooksController> _logger;
 
-        public BooksController(LibraryDataContext context, IMapper mapper, MapperConfiguration config)
+        public BooksController(LibraryDataContext context, IMapper mapper, MapperConfiguration config, ILogger<BooksController> logger)
         {
             _context = context;
             _mapper = mapper;
             _config = config;
+            _logger = logger;
+        }
+
+        [HttpGet("/books")]
+        public async Task<ActionResult> GetAllBooks()
+        {
+            var data = await _context.Books.Where(b => b.IsAvailable)
+                .ProjectTo<BookSummaryItem>(_config)
+                .ToListAsync();
+
+            var response = new GetBooksSummaryResponse
+            {
+                Data = data
+            };
+            return Ok(response);
         }
 
         [HttpGet("/books/{id:int}")]
@@ -34,6 +51,7 @@ namespace LibraryApi.Controllers
 
             if(book == null)
             {
+                _logger.LogWarning("No book with that id!", id);
                 return NotFound();
             } else
             {

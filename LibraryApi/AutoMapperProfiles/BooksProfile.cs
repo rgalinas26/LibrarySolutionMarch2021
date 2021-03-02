@@ -13,6 +13,7 @@ namespace LibraryApi.AutoMapperProfiles
         public BooksProfile()
         {
             CreateMap<Book, GetBookDetailsResponse>();
+            CreateMap<Book, BookSummaryItem>();
         }
     }
 }
