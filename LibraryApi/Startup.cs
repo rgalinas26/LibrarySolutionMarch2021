@@ -31,7 +31,10 @@ namespace LibraryApi
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddControllers();
+            services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.IgnoreNullValues = true;
+            });
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "LibraryApi", Version = "v1" });
@@ -45,7 +48,7 @@ namespace LibraryApi
 
             services.AddDbContext<LibraryDataContext>(options =>
             {
-                options.UseSqlServer(@"server=.\sqlexpress;database=library_dev;integrated security=true");
+                options.UseSqlServer(Configuration.GetConnectionString("Library"));
             });
 
             var mapperConfig = new MapperConfiguration(options =>

@@ -27,10 +27,26 @@ namespace LibraryApi.Controllers
             _logger = logger;
         }
 
+        [HttpDelete("/books/{id:int}")]
+        public async Task<ActionResult> RemoveBookFromInventory(int id)
+        {
+            var book = await _context.AvailableBooks.SingleOrDefaultAsync(b => b.Id == id);
+            if(book != null)
+            {
+                book.IsAvailable = false;
+                await _context.SaveChangesAsync();
+            }
+            return NoContent();
+        }
+
         [HttpPost("/books")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 15)]
         public async Task<ActionResult> AddABook([FromBody] PostBookRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var bookToSave = _mapper.Map<Book>(request);
             _context.Books.Add(bookToSave);
             await _context.SaveChangesAsync();
@@ -40,15 +56,20 @@ namespace LibraryApi.Controllers
         }
 
         [HttpGet("/books")]
-        public async Task<ActionResult> GetAllBooks()
+        public async Task<ActionResult> GetAllBooks([FromQuery] string genre = null)
         {
-            var data = await _context.Books.Where(b => b.IsAvailable)
-                .ProjectTo<BookSummaryItem>(_config)
-                .ToListAsync();
+            var query = _context.AvailableBooks;
+            if(genre != null)
+            {
+                query = query.Where(b => b.Genre == genre);
+            }
+
+            var data = await query.ProjectTo<BookSummaryItem>(_config).ToListAsync();
 
             var response = new GetBooksSummaryResponse
             {
-                Data = data
+                Data = data,
+                GenreFilter = genre
             };
             return Ok(response);
         }
@@ -56,8 +77,8 @@ namespace LibraryApi.Controllers
         [HttpGet("/books/{id:int}", Name ="books#getbookbyid")]
         public async Task<ActionResult> GetBookById(int id)
         {
-            var book = await _context.Books
-                .Where(b => b.IsAvailable && b.Id == id)
+            var book = await _context.AvailableBooks
+                .Where(b => b.Id == id)
                 .ProjectTo<GetBookDetailsResponse>(_config)
                 .SingleOrDefaultAsync();
 
